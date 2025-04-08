@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import mk from "../assets/svgs/mk.svg";
 
 export default function DynamicBanner() {
@@ -8,6 +8,11 @@ export default function DynamicBanner() {
   );
   const [image, setImage] = useState(null);
   const [bgColor, setBgColor] = useState("#283E68");
+
+  useEffect(() => {
+    document.body.style.backgroundColor = "#ffffff";
+    document.body.style.color = "#000000";
+  }, []);
 
   const handleImageUpload = (e) => {
     const file = e?.target?.files[0];
@@ -26,15 +31,14 @@ export default function DynamicBanner() {
         alignItems: "center",
         justifyContent: "center",
         width: "100%",
-        height: "100vh",
-        padding: "60px",
+        padding: "20px 60px 40px 60px",
       }}
     >
       {/* Banner */}
       <div
         style={{
           width: "1200px",
-          height: "90vh",
+          height: "45vh",
           display: "flex",
           position: "relative",
           backgroundColor: bgColor,
@@ -64,7 +68,7 @@ export default function DynamicBanner() {
               position: "absolute",
               top: "5px",
               right: "40px",
-              maxHeight: "250px",
+              maxHeight: "350px",
               maxWidth: "500px",
               objectFit: "contain",
               zIndex: 2,
@@ -74,7 +78,9 @@ export default function DynamicBanner() {
 
         <div
           style={{
-            padding: "30px",
+            paddingTop: "100px",
+            paddingLeft: "100px",
+            paddingRight: "40px",
             textAlign: "left",
             color: "white",
             width: "calc(100% - 250px)",
@@ -86,7 +92,7 @@ export default function DynamicBanner() {
         >
           <h1
             style={{
-              fontSize: "30px",
+              fontSize: "35px",
               fontWeight: "bold",
               maxWidth: "60%",
             }}
@@ -97,7 +103,7 @@ export default function DynamicBanner() {
             style={{
               fontSize: "16px",
               maxWidth: "68%",
-              flexGrow: 2,
+              flexGrow: 3,
               overflowWrap: "break-word",
             }}
           >
@@ -114,7 +120,7 @@ export default function DynamicBanner() {
           padding: "30px",
           backgroundColor: "#f0f0f0",
           borderRadius: "10px",
-          boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+          boxShadow: "0px 6px 20px rgba(0, 0, 0, 0.25)",
         }}
       >
         <h2
@@ -134,22 +140,72 @@ export default function DynamicBanner() {
               type="text"
               value={title}
               onChange={(e) => setTitle(e?.target?.value)}
+              aria-label="Banner Title"
               style={{
                 width: "100%",
                 padding: "6px",
                 border: "1px solid #ccc",
                 borderRadius: "8px",
                 resize: "vertical",
+                backgroundColor: "#f0f0f0",
+                color: "#000",
               }}
             />
           </label>
-          <label style={{ fontSize: "18px", fontWeight: "500" }}>
-            Banner Description
+
+          {/* Banner description */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <label
+                style={{
+                  fontSize: "18px",
+                  fontWeight: "500",
+                  marginBottom: "5px",
+                }}
+              >
+                Banner Description
+              </label>
+              <span style={{ fontSize: "12px", fontWeight: "400" }}>
+                {description.trim().split(/\s+/).filter(Boolean).length}/50
+                words
+              </span>
+            </div>
             <textarea
               value={description}
+              aria-label="Banner Description"
               onChange={(e) => {
-                const words = e.target.value.split(" ").slice(0, 20).join(" ");
-                setDescription(words);
+                const words = e.target.value
+                  .trim()
+                  .split(/\s+/)
+                  .filter(Boolean);
+                if (words.length <= 50) {
+                  setDescription(e.target.value);
+                } else {
+                  // Truncate to first 50 words
+                  const trimmed = words.slice(0, 50).join(" ");
+                  setDescription(trimmed);
+                }
+              }}
+              onPaste={(e) => {
+                e.preventDefault();
+                const paste = e.clipboardData.getData("text");
+                const currentWords = description
+                  .trim()
+                  .split(/\s+/)
+                  .filter(Boolean);
+                const pasteWords = paste.trim().split(/\s+/).filter(Boolean);
+                const remaining = 50 - currentWords.length;
+
+                if (remaining <= 0) return;
+
+                const allowedPaste = pasteWords.slice(0, remaining).join(" ");
+                setDescription((prev) => (prev + " " + allowedPaste).trim());
               }}
               style={{
                 width: "100%",
@@ -159,12 +215,12 @@ export default function DynamicBanner() {
                 minHeight: "80px",
                 resize: "vertical",
                 fontSize: "12px",
+                backgroundColor: "#f0f0f0",
+                color: "#000",
               }}
             />
-            <p style={{ textAlign: "right", fontSize: "10px" }}>
-              {description?.split(" ").length}/20 words
-            </p>
-          </label>
+          </div>
+
           <label style={{ fontSize: "18px", fontWeight: "500" }}>
             Banner Image
             <p
@@ -176,6 +232,7 @@ export default function DynamicBanner() {
               type="file"
               accept="image/*"
               onChange={handleImageUpload}
+              aria-label="Banner Image"
               style={{
                 width: "100%",
                 padding: "8px",
@@ -211,6 +268,7 @@ export default function DynamicBanner() {
                 type="color"
                 value={bgColor}
                 onChange={(e) => setBgColor(e?.target?.value)}
+                aria-label="Banner Background Color"
                 style={{
                   width: "60px",
                   height: "40px",
@@ -218,6 +276,7 @@ export default function DynamicBanner() {
                   padding: "0",
                   cursor: "pointer",
                   background: "none",
+                  color: "#000",
                 }}
               />
               <input
@@ -231,6 +290,7 @@ export default function DynamicBanner() {
                   fontSize: "14px",
                   textAlign: "center",
                   backgroundColor: "#fff",
+                  color: "#000",
                 }}
               />
             </div>
